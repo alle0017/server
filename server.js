@@ -20,8 +20,12 @@ const newPuppetChrome = async ( url )=>{
       args:['--start-maximized' ],
       defaultViewport: null,
     });
-    const page = await browser.newPage();
+  
+    let [page] = await browser.pages();
+    if( !page )
+      page = await browser.newPage();
     await page.goto( url );
+  
     fs.watch(path.join(__dirname, '../'), {
       recursive: true,
     }, ()=>{
