@@ -1,10 +1,19 @@
 const express = require('express');
 const path = require('path');
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer-extra');
+const stealthPlugin = require('puppeteer-extra-plugin-stealth');
 const fs = require('fs');
+const antibot = require('./serverside-antibot.js');
+const bodyParser = require('body-parser');
 
+ 
+
+
+puppeteer.use(stealthPlugin());
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(bodyParser.json());
 
 console.clear();
 console.log('\x1B[1m\x1B[4mSTICKER LIVE SERVER\x1B[0m \x1B[1m\x1B[2m/|\\ ^._.^ /|\\ \x1B[0m\n\n');
@@ -27,7 +36,7 @@ const newPuppetChrome = async ( url )=>{
     await page.goto( url );
   
     fs.watch(path.join(__dirname, '../'), {
-      recursive: true,
+      recursive: false,
     }, ()=>{
         page.reload()
     })
@@ -40,15 +49,16 @@ app.use((req, res, next) => {
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       // Set Cross-Origin-Opener-Policy header
-      res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+      //res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
       // Set Cross-Origin-Embedder-Policy header
-      res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+      //res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
       next();
 });
 app.use(express.static(path.join(__dirname, '../')));
 
-// Start the server
+antibot.setupAntiBot(app, path)
 
+// Start the server
 const server = app.listen(PORT, async () => {
       
       log("opening web page with chrome...", {
